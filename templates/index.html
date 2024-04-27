@@ -2,22 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script src="{{ url_for('static', filename='jquery-3.7.1.min.js') }}"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Homepage</title>
 </head>
 <body>
     {% if res %}
-        <form action="/" method="post">
+        <form method="post">
             <input type="text" name="prompt" id="prompt"  value="{{res}}">
             <input type="submit" value="Submit">
         </form>
         <h1>{{res}}</h1>
     {% else %}
         <form action="/" method="post">
+            <input type="text" name="prompt" id="BookName"  value="What is the name of the book">
             <input type="text" name="prompt" id="prompt"  value="How would you like the story?">
             <input type="submit" value="Submit">
         </form>
     {% endif %}
-
+    <audio controls>
+        <source id="Audio" type="audio/mpeg">
+    </audio>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
 </body>
 </html>
