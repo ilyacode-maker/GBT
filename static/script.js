@@ -1,20 +1,66 @@
 const url = window.location + "audio";
 
+
+//====================Variables==================//
 var name = $("#BookName").val();
 var tone = $("#prompt").val();
-SendChunk(name,tone);
+var audio1 = new Audio("./static/out000.mp3");
+var audio2 = new Audio("./static/out001.mp3");
+var audio3 = new Audio("./static/out002.mp3");
+var audio4 = new Audio("./static/out003.mp3");
+var audio5 = new Audio("./static/out004.mp3");
+var Audios = [audio1, audio2, audio3];
+
+
+
 /* 
 TODO LIST/:
 
 -Input Handling
 -Requests to The server side
--Piecing Everything Together 
+-Live Audio Playing                   -Done
+-Audio controls settings
 
 */
 
 
 
-async function SendChunk(chunk,tone) {
+
+//======Simulating a late response======//
+setTimeout(() => {
+
+  Audios.push(audio4);
+
+},2000);
+
+setTimeout(() => {
+
+  Audios.push(audio5);
+
+},5000);
+
+//====Piecing Audio Chunks together====// 
+Audios[0].play();
+LiveAudio(0);
+
+function LiveAudio(index) {
+
+  Audios[index].onended = () => {
+    if (index + 1 < Audios.length) {
+
+      Audios[index + 1].play();
+      LiveAudio(index + 1);
+
+    }
+
+  }
+
+}
+
+
+
+//========== Sending Request to get Audio Chunk in return =============//
+async function SendChunk(chunk,tone, url) {
   try {
     data  = {"Chunk" : chunk};
     var response = await fetch(url, {
@@ -24,12 +70,11 @@ async function SendChunk(chunk,tone) {
         },
         body: JSON.stringify(data)
       });
-    var something = await response.arrayBuffer();
-    console.log(something.slice())
 
   } catch (error) {
 
     console.log("error : " + error);
 
   }
+  return SendChunk()
 }
