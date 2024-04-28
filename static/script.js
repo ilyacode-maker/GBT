@@ -23,6 +23,17 @@ TODO LIST/:
 
 */
 
+//======Given a Name Only=============//
+
+function GetAudioName(BookName,tone) {
+
+  FirstAudio = SendChunk(BookName,tone,url);
+  var index = 0;
+  Audios.push(FirstAudio);
+  Audios[0].play();
+  LiveAudio(0);
+
+}
 
 
 
@@ -39,7 +50,13 @@ setTimeout(() => {
 
 },5000);
 
+setTimeout(() => {
+
+  SendChunk("Something","who_cares", url);
+
+}, 7500);
 //====Piecing Audio Chunks together====// 
+
 Audios[0].play();
 LiveAudio(0);
 
@@ -70,11 +87,14 @@ async function SendChunk(chunk,tone, url) {
         },
         body: JSON.stringify(data)
       });
-
+      var audioBlob = await response.blob();
+      var AudioURL = URL.createObjectURL(audioBlob);
+      var AudioObject = new Audio(AudioURL);
+      Audios.push(AudioObject);
   } catch (error) {
 
     console.log("error : " + error);
 
   }
-  return SendChunk()
+  
 }
