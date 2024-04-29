@@ -1,12 +1,15 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, url_for
+from ai import create_content
+
 
 app = Flask(__name__)
 
 @app.route('/',methods = ['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        message  = request.form['prompt']
-        return render_template('index.html', res=message)
+        specs = request.form['specs']
+        txt = create_content(specs)
+        return render_template('index.html', res=txt)
     else:
         return render_template('index.html')
 
