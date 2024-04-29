@@ -9,7 +9,7 @@ from log import logText
 import log
 
 genai.configure(api_key=os.getenv('API_KEY'))
-model = genai.GenerativeModel('gemini-pro')
+model = genai.GenerativeModel('gemini-1.5-pro-latest')
 
 
 def get_response(specifications): #---------------------STILL TO ADD THE PARAMETER OF THE BOOK ONCE GIVEN
@@ -29,10 +29,12 @@ def get_response(specifications): #---------------------STILL TO ADD THE PARAMET
             HarmCategory.HARM_CATEGORY_HARASSMENT       : HarmBlockThreshold.BLOCK_NONE,
             HarmCategory.HARM_CATEGORY_HATE_SPEECH      : HarmBlockThreshold.BLOCK_NONE,
             HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-        }
+        },
+        stream=True
     )
     try:
-        return res.text
+        for chunk in res:
+            yield chunk.text
     except:
         print(res.candidates)
 
@@ -41,8 +43,12 @@ def create_content(Specifications):
     txt = story.read()
     story.close()
 
-    txt=get_response(Specifications)
-    logText(txt,'./Log/test_files')
+    for m in get_response(Specifications):
+        txt= txt + m
+    logText(txt,'./Log/test_files', data={
+        'source': './testBooks/TheMantle.txt',
+        'prompt': f' Reformulate the following story in {Specifications} manner.'
+    })
     return txt
 
 
