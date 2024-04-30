@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <script src="{{ url_for('static', filename='jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='epub.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Homepage</title>
 </head>
@@ -17,6 +19,8 @@
         <form action="/" method="post">
             <input type="text" name="prompt" id="BookName"  value="What is the name of the book">
             <input type="text" name="prompt" id="prompt"  value="How would you like the story?">
+            <input type="file" id="FileInput"  value="Upload">
+            <div id="area"></div>
             <input type="submit" value="Submit">
         </form>
     {% endif %}
