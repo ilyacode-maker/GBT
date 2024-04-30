@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" >
 <head>
-  <meta charset="UTF-8">
-  <title>GBT - YOUR AI</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
-
+    <meta charset="UTF-8">
+    <script src="{{ url_for('static', filename='jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='epub.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
 </head>
 <body>
 <section class="msger">
@@ -37,32 +39,24 @@
     </div>
 
     {% if res %}
-    <div class="msg left-msg">
-      <div
-       class="msg-img"
-       style="background-image: url(https://www.svgrepo.com/show/409868/bot.svg)"
-      ></div>
-
-      <div class="msg-bubble">
-        <div class="msg-info">
-          <div class="msg-info-name">BOT</div>
-          <div class="msg-info-time">Now</div>
-        </div>
-
-        <div class="msg-text">
-          {{res}}
-        </div>
-      </div>
-    </div>
-    {%endif%}
-  </main>
-
-  <form class="msger-inputarea" action="/" method="post">
-    <input type="text" class="msger-input" placeholder="Enter your message..." name="specs" id="specs">
-    <button type="submit" class="msger-send-btn">Send</button>
-  </form>
-</section>
-  <script  src="{{url_for('static', filename='javascript/script.js')}}"></script>
-
+        <form method="post">
+            <input type="text" name="prompt" id="prompt"  value="{{res}}">
+            <input type="submit" value="Submit">
+        </form>
+        <h1>{{res}}</h1>
+    {% else %}
+        <form action="/" method="post">
+            <input type="text" name="prompt" id="BookName"  value="What is the name of the book">
+            <input type="text" name="prompt" id="prompt"  value="How would you like the story?">
+            <input type="file" id="FileInput"  value="Upload">
+            <div id="area"></div>
+            <input type="submit" value="Submit">
+        </form>
+    {% endif %}
+    <audio controls>
+        <source id="Audio" type="audio/mpeg">
+    </audio>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
 </body>
 </html>
