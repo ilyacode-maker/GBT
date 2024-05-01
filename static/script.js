@@ -1,13 +1,15 @@
-const url = window.location + "audio";
-
 
 //====================Variables==================//
 var name = $("#BookName").val();
+const url = window.location + "audio";
 var tone = $("#prompt").val();
 const END_SIGNATURE = [1,2,3,4,5,6,7,8]
+fileInput = document.getElementById("FileInput");
 var audio1 = new Audio("./static/out000.mp3");
 var audio2 = new Audio("./static/out001.mp3");
 var Audios = [audio1, audio2];
+var Type = "File"
+
 
 
 
@@ -15,80 +17,132 @@ var Audios = [audio1, audio2];
 /* 
 TODO LIST/:
 
--Input Handling
--Requests to The server side
+-Input Handling                       -Done
+-Requests to The server side          -Done
+-Receiving Audio Chunks               -Done
 -Live Audio Playing                   -Done
 -Audio controls settings
 
 */
 
-//====== Handling Ebook Input =============//
-
-// var book = ePub();
-// var rendition;
-
-
-// document.getElementById("FileInput").addEventListener("change", function(e) {
-//   var file = e.target.files[0];
-//   if (window.FileReader) {
-
-//     var reader = new FileReader();
-//     reader.onload = openBook;
-//     reader.readAsArrayBuffer(file);
-
-//   }
-// });
 
 
 
-// function openBook(e){
-//   var bookData = e.target.result;
-
-//   book.open(bookData, "binary");
-
-//   rendition = book.renderTo("area", {
-//     width: "100%",
-//     height: 600
-//   });
-
-//   rendition.display();
-
-// }
 
 
+//============= Start Functionalities ============//
 
-//======Simulating a late response======//
-// setTimeout(() => {
 
-//   Audios.push(audio4);
+$("#tone").hide();
+$("#FileInput").hide();
+$("#BookName").hide();
+$("#SendButton").hide();
+$("#ChooseButton").show();
+$("#InputDiv").show();
 
-// },2000);
 
-// setTimeout(() => {
+//========= Handling File/Text Choice ==========//
+$("#ChooseButton").click(ShowForm);
 
-//   Audios.push(audio5);
 
-// },5000);
+function ShowForm() {
 
-// setTimeout(() => {
+    var Chosen = $("#InputType").val();
+    console.log(Chosen);
+    $("#tone").show();
+    $("#SendButton").show();
+    $("#InputDiv").hide();
+    $("#ChooseButton").hide();
+    if (Chosen == "text") {
+      Type = "Text";
+      $("#BookName").show();
 
-//   SendChunk("Something","who_cares", url);
+    }else {
 
-// }, 7500);
+      $("#FileInput").show();
+
+    }
+
+}
+
+
+//========== Sending Data To Server Side ==========//
+$("#SendButton").click(SendData);
+
+function SendData() {
+
+    var formData = new FormData();
+    formData.append("Type",Type);
+    formData.append('Tone', $("#tone").val());
+
+    if (Type == "File") {
+
+      var file = fileInput.files[0];
+      formData.append('Content', file);
+
+    } else {
+
+      formData.append("Content",$("#BookName").val());
+    }
+
+    //Send a POST request to get the audios back
+    fetch(url, {
+
+      method: "POST",
+      body : formData
+
+
+    })
+    .then(response => response.body)
+    .then(stream => {
+        var reader = stream.getReader();
+        ReadStream(reader);
+    })
+    .catch( (error) => {
+
+       console.error(error);
+
+    });
+    
+}
+
+
+
+
 //====Piecing Audio Chunks together====// 
+var i = 0;
+var SnowBallEffect = false;
+var event = new Event("NewAudio");
 
+//========== Listening for new Added Audios =============//
+document.addEventListener("NewAudio", function() {
+  
+  if (i < Audios.length && !SnowBallEffect) {
 
+    Audios[i].play()
+    LiveAudio();
+    SnowBallEffect = true;
 
-Audios[0].play();
-LiveAudio(0);
+  }
 
-function LiveAudio(index) {
+},false);
 
-  Audios[index].onended = () => {
-    if (index + 1 < Audios.length) {
+//========== Plays the next audio once the current one is done ==================//
+function LiveAudio() {
+  // console.log(i);
+  Audios[i].onended = () => {
+    if (i + 1 < Audios.length) {
+      SnowBallEffect = true;
+      i++;
+      Audios[i].play();
+      LiveAudio(i);
+      
+      
 
-      Audios[index + 1].play();
-      LiveAudio(index + 1);
+    }else {
+
+      i++;
+      SnowBallEffect = false;
 
     }
 
@@ -98,34 +152,8 @@ function LiveAudio(index) {
 
 
 
-//========== Sending Request to get Audio Chunk in return =============//
-// async function SendChunk(chunk,tone, url) {
-//   try {
-//     data  = {"Chunk" : chunk};
-//     var response = await fetch(url, {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify(data)
-//       });
-//       console.log(response);
-//       var audioBlob = await response.blob();
-//       var AudioURL = URL.createObjectURL(audioBlob);
-//       var AudioObject = new Audio(AudioURL);
-//       Audios.push(AudioObject);
-//   } catch (error) {
 
-//     console.log("error : " + error);
-
-//   }
-  
-// }
-
-// SendChunk("something","who_cares",url)
-
-
-
+//============ Checks If 2 Lists are Equal ===================//
 function EqualList(list1,list2) {
 
   if (list1.length != list2.length) {
@@ -148,7 +176,8 @@ function EqualList(list1,list2) {
 
 }
 
-async function consumeStream(reader) {
+//======= Opening a ReadStream to Get Audio Chunks============//
+async function ReadStream(reader) {
   chunks = [];
   while (true) {
       var { done, value } = await reader.read();
@@ -156,10 +185,11 @@ async function consumeStream(reader) {
           console.log("Stream is done");
           break;
       }
-      console.log(value);
       LastEight = value.slice(-8);
       value = value.slice(0, value.length - 8);
       chunks.push(value); 
+      
+      //Check for the end signature to mark the chunks array as a new file
       if (EqualList(LastEight,END_SIGNATURE)) {
 
         var arr = new Uint8Array(chunks.reduce((acc, chunks) => acc.concat(Array.from(chunks)), []));
@@ -167,6 +197,7 @@ async function consumeStream(reader) {
         var AudioURL = URL.createObjectURL(audioBlob);
         var AudioObject = new Audio(AudioURL);
         Audios.push(AudioObject);
+        document.dispatchEvent(event);
         chunks = [];
 
       }else {
@@ -174,18 +205,5 @@ async function consumeStream(reader) {
         chunks.push(LastEight)
 
       }
-      
-      
-
-      
-      
-      
   }
 }
-
-fetch(url)
-    .then(response => response.body)
-    .then(stream => {
-        var reader = stream.getReader();
-      consumeStream(reader);
-    });

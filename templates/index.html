@@ -9,24 +9,30 @@
     <title>Homepage</title>
 </head>
 <body>
-    {% if res %}
-        <form method="post">
-            <input type="text" name="prompt" id="prompt"  value="{{res}}">
-            <input type="submit" value="Submit">
-        </form>
-        <h1>{{res}}</h1>
-    {% else %}
-        <form action="/" method="post">
-            <input type="text" name="prompt" id="BookName"  value="What is the name of the book">
-            <input type="text" name="prompt" id="prompt"  value="How would you like the story?">
-            <input type="file" id="FileInput"  value="Upload">
-            <div id="area"></div>
-            <input type="submit" value="Submit">
-        </form>
-    {% endif %}
-    <audio controls>
-        <source id="Audio" type="audio/mpeg">
-    </audio>
+
+    <div id="InputDiv">
+        <label for="Input">Input Type:</label>
+        <select id="InputType">
+            <option value="file">Ebook File</option>
+            <option value="text">Book's Name</option>
+        </select>
+    </div>
+    <button id="ChooseButton"> Choose </button>
+
+
+
+    <input type="text" id="BookName"  placeholder="What is the name of the book">
+    <input type="file" id="FileInput"  value="Upload">
+    <input type="text" id="tone"  placeholder="How would you like the story?">
+    
+
+    <button id="SendButton"> Reformulate to an Audio</button>
+
+    <!-------an Audio Visualizer with Playback buttons------>
+    
+    
+    
+    <!---->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     
 </body>
