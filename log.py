@@ -9,24 +9,30 @@ def logJson(dataheading, data, filepath):
     file.close()
 
 def logText(text,filepath, data):
-    TestNum = get_test_file_number(filepath)
-    file = open(filepath+ f'/test{TestNum}', 'w')
+    if data['exists']:
+        TestNum = get_test_file_number(filepath)
+        file = open(filepath+ f'/test{TestNum-1}', 'w')
+        file.write(text)
+        file.close()
+    else:
+        TestNum = get_test_file_number(filepath)
+        file = open(filepath+ f'/test{TestNum}', 'w')
 
-    with open(data['source'], 'r') as src:
-        file.write(
-                    f'''Test N{TestNum} \t {datetime.now()} 
-                    Prompt :  {data['prompt']}
+        with open(data['source'], 'r') as src:
+            file.write(
+                        f'''Test N{TestNum} \t {datetime.now()} 
+                        Prompt :  {data['prompt']}
 
 
-                    The input text: 
-                    {src.read()}
-                    \n
+                        The input text: 
+                        {src.read()}
+                        \n
 
-                    --------------------Reformulation----------------
-                    {text}
-                    '''
-                )
-    file.close()
+                        --------------------Reformulation----------------
+                        {text}
+                        '''
+                    )
+        file.close()
         
 def get_test_file_number(directory):
     # Get a list of all files in the directory
