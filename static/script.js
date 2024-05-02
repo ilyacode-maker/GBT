@@ -8,6 +8,7 @@ fileInput = document.getElementById("FileInput");
 var audio1 = new Audio("./static/out000.mp3");
 var audio2 = new Audio("./static/out001.mp3");
 var Audios = [audio1, audio2];
+var AudioPlaying = false;
 var Type = "File"
 
 
@@ -21,7 +22,7 @@ TODO LIST/:
 -Requests to The server side          -Done
 -Receiving Audio Chunks               -Done
 -Live Audio Playing                   -Done
--Audio controls settings
+-Audio controls settings              -Done
 
 */
 
@@ -114,12 +115,13 @@ var i = 0;
 var SnowBallEffect = false;
 var event = new Event("NewAudio");
 
-//========== Listening for new Added Audios =============//
+// Listening for new Added Audios
 document.addEventListener("NewAudio", function() {
   
   if (i < Audios.length && !SnowBallEffect) {
 
     Audios[i].play()
+    AudioPlaying = true;
     LiveAudio();
     SnowBallEffect = true;
 
@@ -131,8 +133,11 @@ document.addEventListener("NewAudio", function() {
 function LiveAudio() {
   // console.log(i);
   Audios[i].onended = () => {
+    console.log("ended");
+    AudioPlaying = false;
     if (i + 1 < Audios.length) {
       SnowBallEffect = true;
+      AudioPlaying = true;
       i++;
       Audios[i].play();
       LiveAudio(i);
@@ -206,4 +211,78 @@ async function ReadStream(reader) {
 
       }
   }
+}
+
+
+
+//========== Audio Controls Implementation ==============//
+var IncrementAmount = 4;
+var DecrementAmount = 1;
+
+//Pause Functionality
+$("#Pause").click(Pause)
+
+function Pause() {
+  console.log("Done");
+  if (AudioPlaying) {
+
+    AudioPlaying = false;
+    Audios[i].pause();
+
+  }else {
+    AudioPlaying = true;
+    Audios[i].play();
+
+  }
+
+}
+
+
+
+//Add 5s Functionality
+$("#Forward").click(Add);
+
+
+function Add() {
+  var Left = Audios[i].duration - Audios[i].currentTime;
+  if (Left < IncrementAmount) {
+    // console.log(Left);
+    Audios[i].currentTime = Audios[i].duration;
+    if (i < Audios.length - 1) {
+      Audios[i + 1].currentTime = IncrementAmount - Left;
+
+    }
+  }else {
+
+    Audios[i].currentTime += IncrementAmount;
+
+  }
+
+}
+
+
+//Substract 5s Functionality
+$("#Back").click(Substract);
+
+
+function Substract() {
+  var Left = Audios[i].currentTime;
+  if (Left < DecrementAmount) {
+
+    Audios[i].currentTime = 0;
+    if (i != 0) {
+      Audios[i].pause();
+      i--;
+      Audios[i].currentTime = Audios[i].duration - (DecrementAmount - Left);
+      Audios[i].play();
+      LiveAudio();
+
+    }
+
+  }else {
+
+    Audios[i].currentTime -= DecrementAmount;
+
+  }
+
 }
